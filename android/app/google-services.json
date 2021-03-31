@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "440563267524",
+    "firebase_url": "https://gugulethu-411fa.firebaseio.com",
+    "project_id": "gugulethu-411fa",
+    "storage_bucket": "gugulethu-411fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440563267524:android:e51658105fd3fbc9dd5691",
+        "android_client_info": {
+          "package_name": "com.plutocrats.onlineshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "440563267524-0po1gg0ahr0i9untercc7du4uurkmc8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlRniANyaKEISCmtWL39sQynos3j5frPI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "440563267524-0po1gg0ahr0i9untercc7du4uurkmc8l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "440563267524-rhkrmp955ah64ibf9hqmd4f3qer65f8a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.plutocrats.onlineshop"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
