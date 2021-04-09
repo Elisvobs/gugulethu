@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:onlineshop/main.dart';
 import 'package:onlineshop/tools/app_tools.dart';
-import 'package:onlineshop/userScreens/cart.dart';
+import 'package:onlineshop/views/shared/icons.dart';
+
+import '../main.dart';
+import 'shared/app_colors.dart';
+import 'shared/styles.dart';
 
 class ItemDetail extends StatefulWidget {
   String itemName, itemImage, itemSubName;
-  // String itemDesc, itemPrice, itemRating;
   String itemDesc, itemRating;
   int itemPrice;
   List itemImages, itemColors, itemSizes;
@@ -23,6 +25,7 @@ class ItemDetail extends StatefulWidget {
     this.itemSizes,
     this.itemColors,
     this.isInFavorite,
+    //todo add is in cart
   });
 
   @override
@@ -30,6 +33,8 @@ class ItemDetail extends StatefulWidget {
 }
 
 class _ItemDetailState extends State<ItemDetail> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
+
   List<DropdownMenuItem<String>> _dropDownColors;
   String _selectedColor;
 
@@ -40,12 +45,10 @@ class _ItemDetailState extends State<ItemDetail> {
   List<String> colorsAvList = new List();
 
   int defaultQuantity = 1;
+  int cartCount = 0;
   bool isFavorite;
   bool isInCart = false;
   String productName, itemPrice, productImage;
-  final scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  int cartCount = 0;
 
   @override
   void initState() {
@@ -53,48 +56,23 @@ class _ItemDetailState extends State<ItemDetail> {
     setState(() {
       isFavorite = widget.isInFavorite;
       productName = widget.itemName;
-      itemPrice = widget.itemPrice as String;
+      itemPrice = '${widget.itemPrice}';
       productImage = widget.itemImage;
     });
     colorsAvList = new List.from(widget.itemColors);
     sizesAvList = new List.from(widget.itemSizes);
 
-    _dropDownColors = buildAndGetDropDownQuantity(colorsAvList);
+    _dropDownColors = buildAndGetDropDownColor(colorsAvList);
     _selectedColor = _dropDownColors[0].value;
 
     _dropDownSizes = buildAndGetDropDownSizes(sizesAvList);
     _selectedSize = _dropDownSizes[0].value;
   }
 
-  List<DropdownMenuItem<String>> buildAndGetDropDownQuantity(List quantity) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String quantity in quantity) {
-      items.add(
-          new DropdownMenuItem(value: quantity, child: new Text(quantity)));
-    }
-    return items;
-  }
-
   void changedDropDownColors(String selectedColors) {
     setState(() {
       _selectedColor = selectedColors;
     });
-  }
-
-  List<DropdownMenuItem<String>> buildAndGetDropDownSizes(List size) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String size in size) {
-      items.add(new DropdownMenuItem(value: size, child: new Text(size)));
-    }
-    return items;
-  }
-
-  List<DropdownMenuItem<String>> buildAndGetDropDownKitchen(List size) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String size in size) {
-      items.add(new DropdownMenuItem(value: size, child: new Text(size)));
-    }
-    return items;
   }
 
   void changedDropDownSize(String selectedSize) {
@@ -111,16 +89,12 @@ class _ItemDetailState extends State<ItemDetail> {
       appBar: new AppBar(
         title: new Text(widget.itemName),
         centerTitle: false,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: white),
         automaticallyImplyLeading: true,
         actions: [
           new IconButton(
-            icon: new Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () => Navigator.of(context).push(
-              new CupertinoPageRoute(
-                builder: (BuildContext context) => new Cart(),
-              ),
-            ),
+            icon: cart,
+            onPressed: () => Navigator.of(context).pushNamed('/cart'),
           ),
         ],
       ),
@@ -149,34 +123,32 @@ class _ItemDetailState extends State<ItemDetail> {
                         ),
                       ),
                     ),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        new PageRouteBuilder(
-                          opaque: false,
-                          pageBuilder: (BuildContext context, _, __) {
-                            return new Material(
-                              color: Colors.black38,
-                              child: new Container(
-                                padding: const EdgeInsets.all(30.0),
-                                child: new GestureDetector(
-                                  child: new Hero(
-                                    tag: widget.itemName,
-                                    child: new Image.network(
-                                      widget.itemImage,
-                                      width: 300.0,
-                                      height: 300.0,
-                                      alignment: Alignment.center,
-                                      fit: BoxFit.contain,
-                                    ),
+                    onTap: () => Navigator.of(context).push(
+                      new PageRouteBuilder(
+                        opaque: false,
+                        pageBuilder: (BuildContext context, _, __) {
+                          return new Material(
+                            color: black,
+                            child: new Container(
+                              padding: const EdgeInsets.all(30.0),
+                              child: new GestureDetector(
+                                child: new Hero(
+                                  tag: widget.itemName,
+                                  child: new Image.network(
+                                    widget.itemImage,
+                                    width: 300.0,
+                                    height: 300.0,
+                                    alignment: Alignment.center,
+                                    fit: BoxFit.contain,
                                   ),
-                                  onTap: () => Navigator.pop(context),
                                 ),
+                                onTap: () => Navigator.pop(context),
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                   const Padding(padding: const EdgeInsets.only(left: 18.0)),
                   new Expanded(
@@ -184,21 +156,11 @@ class _ItemDetailState extends State<ItemDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        new Text(
-                          widget.itemName,
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        new Text(widget.itemName, style: itemTxt),
                         const Padding(padding: const EdgeInsets.only(top: 6.0)),
                         new Text(
-                          "\$" + widget.itemPrice.toString(),
-                          style: const TextStyle(
-                            color: const Color(0xFF8E8E93),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w100,
-                          ),
+                          "\$${widget.itemPrice.toString()}",
+                          style: itemTxt,
                         ),
                       ],
                     ),
@@ -213,18 +175,10 @@ class _ItemDetailState extends State<ItemDetail> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 5.0, top: 0.0, bottom: 2.0),
+                    padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 2.0),
                     child: new Row(
                       children: [
-                        const Text(
-                          'SIZES AVAILABLE',
-                          style: const TextStyle(
-                            color: const Color(0xFF646464),
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
+                        Text('SIZES AVAILABLE', style: sTxt),
                         new Container(
                           margin: new EdgeInsets.only(left: 60.0),
                           child: new DropdownButton(
@@ -237,18 +191,10 @@ class _ItemDetailState extends State<ItemDetail> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 5.0, top: 5.0, bottom: 2.0),
+                    padding: const EdgeInsets.fromLTRB(5.0, 5.0, 0.0, 2.0),
                     child: new Row(
                       children: <Widget>[
-                        const Text(
-                          'COLORS AVAILABLE',
-                          style: const TextStyle(
-                            color: const Color(0xFF646464),
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
+                        Text('COLORS AVAILABLE', style: sTxt),
                         new Container(
                           margin: new EdgeInsets.only(left: 50.0),
                           child: new DropdownButton(
@@ -261,46 +207,23 @@ class _ItemDetailState extends State<ItemDetail> {
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 5.0, top: 5.0, bottom: 2.0),
+                    padding: const EdgeInsets.fromLTRB(5.0, 5.0, 0.0, 2.0),
                     child: new Row(
                       children: <Widget>[
-                        const Text(
-                          'SET QUANTITY',
-                          style: const TextStyle(
-                            color: const Color(0xFF646464),
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
+                        Text('SET QUANTITY', style: sTxt),
                         new Padding(padding: new EdgeInsets.only(left: 60.0)),
                         new CupertinoButton(
                           padding: EdgeInsets.zero,
-                          child: new Icon(
-                            CupertinoIcons.minus_circled,
-                            color: Colors.black,
-                            semanticLabel: 'Substract',
-                          ),
+                          child: minus,
                           onPressed: () => setState(() {
                             if (defaultQuantity == 1) return;
                             defaultQuantity--;
                           }),
                         ),
-                        new Text(
-                          defaultQuantity.toString(),
-                          style: const TextStyle(
-                            color: const Color(0xFF8E8E93),
-                            fontSize: 13.0,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
+                        new Text(defaultQuantity.toString(), style: itemQty),
                         new CupertinoButton(
                           padding: EdgeInsets.zero,
-                          child: new Icon(
-                            CupertinoIcons.plus_circled,
-                            color: Colors.black,
-                            semanticLabel: 'Add',
-                          ),
+                          child: plus,
                           onPressed: () => setState(() {
                             defaultQuantity++;
                           }),
@@ -316,7 +239,7 @@ class _ItemDetailState extends State<ItemDetail> {
       ),
       bottomNavigationBar: new Container(
         height: 50.0,
-        decoration: new BoxDecoration(color: Theme.of(context).primaryColor),
+        decoration: new BoxDecoration(color: primaryColor),
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -325,33 +248,27 @@ class _ItemDetailState extends State<ItemDetail> {
                     child: Container(
                       width: screenSize.width * 0.5,
                       height: 50.0,
-                      color: Colors.white,
+                      color: white,
                       child: new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           new Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: new Icon(
-                              Icons.favorite,
-                              color: Colors.white,
-                              size: 20.0,
-                            ),
+                            child: favorite,
                           ),
-                          new Text(
-                            'REMOVE FAVORITE',
-                            style: new TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
+                          new Text('REMOVE FAVORITE', style: itemFav),
                         ],
                       ),
                     ),
                     onTap: () {
-                      showSnackBar(
-                          "Removed $productName from favorites", scaffoldKey);
+                      String favNeg = "Removed $productName from favorites";
+                      fb
+                          .collection('appProducts')
+                          // .document(document.documentID)
+                          .document()
+                          .delete();
+                      showSnackBar(favNeg, scaffoldKey);
                       isFavorite = false;
                       setState(() {});
                     },
@@ -360,30 +277,23 @@ class _ItemDetailState extends State<ItemDetail> {
                     child: Container(
                       width: screenSize.width * 0.5,
                       height: 50.0,
-                      color: Colors.white,
+                      color: white,
                       child: Row(
                         children: [
                           new Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: new Icon(Icons.favorite_border,
-                                color: Colors.blue, size: 20.0),
+                            child: addToFav,
                           ),
-                          new Text(
-                            "ADD TO FAVORITES",
-                            // textAlign: TextAlign.center,
-                            style: new TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
+                          new Text("ADD TO FAVORITES", style: itemFav),
                         ],
                       ),
                     ),
                     onTap: () {
+                      String favAdd = 'Added $productName to favorites';
                       bool fav = true;
                       isFavorite = fav;
                       // firestore.collection('favorites').document(userID).setData({
+                      //todo update per user
                       fb.collection('favorites').add({
                         'isFavorite': fav,
                         'product': productName,
@@ -392,8 +302,8 @@ class _ItemDetailState extends State<ItemDetail> {
                         // 'quantity': defaultQuantity,
                         // 'isFavorite': isFavorite,
                       });
-                      showSnackBar(
-                          'Added $productName to favorites', scaffoldKey);
+                      // }).then((value) => showSnackBar('Added $productName to favorites', scaffoldKey));
+                      showSnackBar(favAdd, scaffoldKey);
                       setState(() {});
                     },
                   ),
@@ -408,34 +318,27 @@ class _ItemDetailState extends State<ItemDetail> {
                         children: [
                           new Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: new Icon(
-                              Icons.remove_shopping_cart,
-                              color: Colors.white,
-                              size: 20.0,
-                            ),
+                            child: removeCart,
                           ),
-                          new Text(
-                            "REMOVE CART",
-                            style: new TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
+                          new Text("REMOVE CART", style: itemCart),
                         ],
                       ),
                     ),
                     onTap: () {
-                      // widget.fbConn.removeFromCart(widget.index);
-                      // TODO add firebase item deletion
-                      showSnackBar(
-                          "Removed $productName from your cart", scaffoldKey);
+                      String cartNeg = "Removed $productName from your cart";
+                      fb
+                          .collection('appProducts')
+                          // .document(document.documentID)
+                          .document()
+                          .delete();
+                      showSnackBar(cartNeg, scaffoldKey);
                       isInCart = false;
                       setState(() {});
                     },
                   )
                 : new GestureDetector(
                     onTap: () {
+                      String cartAdd = "Added $productName to your cart";
                       bool fav = true;
                       isInCart = fav;
                       // firestore.collection('favorites').document(userID).setData({
@@ -449,34 +352,22 @@ class _ItemDetailState extends State<ItemDetail> {
                         'size': _selectedSize,
                         // 'isFavorite': isFavorite,
                       });
-                      showSnackBar(
-                          " Added $productName to your cart", scaffoldKey);
+                      //todo upon successful addition invoke the checkout page
+                      showSnackBar(cartAdd, scaffoldKey);
                       setState(() {});
                     },
                     child: new Container(
                       width: screenSize.width * 0.40,
                       height: 50.0,
-                      //color: Colors.white,
                       child: new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           new Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: new Icon(
-                              Icons.add_shopping_cart,
-                              color: Colors.white,
-                              size: 20.0,
-                            ),
+                            child: addToShop,
                           ),
-                          new Text(
-                            "ADD TO CART",
-                            style: new TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
+                          new Text("ADD TO CART", style: itemCart),
                         ],
                       ),
                     ),

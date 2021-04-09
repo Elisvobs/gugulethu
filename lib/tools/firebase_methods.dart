@@ -4,18 +4,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:onlineshop/main.dart';
 
 import 'app_data.dart';
 import 'app_methods.dart';
 import 'app_tools.dart';
 
 class FirebaseMethods implements AppMethods {
-  Firestore firestore = Firestore.instance;
-  FirebaseAuth auth = FirebaseAuth.instance;
-
   @override
-  Future<String> createUserAccount(
-      {String fullName, String phone, String email, String password}) async {
+  Future<String> createUserAccount({
+    String fullName,
+    String phone,
+    String address,
+    String location,
+    String city,
+    String email,
+    String password,
+  }) async {
     FirebaseUser user;
 
     try {
@@ -23,17 +28,23 @@ class FirebaseMethods implements AppMethods {
           email: email, password: password);
 
       if (user != null) {
-        await firestore.collection(userData).document(user.uid).setData({
+        await fb.collection(userData).document(user.uid).setData({
           userID: user.uid,
           accountName: fullName,
           userEmail: email,
           userPassword: password,
-          phoneNumber: phone
+          phoneNumber: phone,
+          deliveryAddress: address,
+          deliveryLocation: location,
+          deliveryCity: city,
         });
 
         writeDataLocally(key: userID, value: user.uid);
         writeDataLocally(key: accountName, value: fullName);
         writeDataLocally(key: phoneNumber, value: phone);
+        writeDataLocally(key: deliveryAddress, value: address);
+        writeDataLocally(key: deliveryLocation, value: location);
+        writeDataLocally(key: deliveryCity, value: city);
         writeDataLocally(key: userEmail, value: email);
         writeDataLocally(key: userPassword, value: password);
       }
@@ -68,7 +79,7 @@ class FirebaseMethods implements AppMethods {
       return errorMSG(e.details);
     }
 
-//   showSnackBar(message, scaffoldKey);
+    // showSnackBar(message, scaffoldKey);
     return user == null ? errorMSG("Error") : successfulMSG();
   }
 
@@ -98,17 +109,14 @@ class FirebaseMethods implements AppMethods {
 
   @override
   Future<DocumentSnapshot> getUserInfo(String userId) async {
-    return await firestore.collection(userData).document(userId).get();
+    return await fb.collection(userData).document(userId).get();
   }
 
   @override
   Future<String> addNewProduct({Map newProduct}) async {
     String documentId;
     try {
-      await firestore
-          .collection(appProducts)
-          .add(newProduct)
-          .then((documentRef) {
+      await fb.collection(appProducts).add(newProduct).then((documentRef) {
         documentId = documentRef.documentID;
       });
     } on PlatformException catch (e) {
@@ -151,7 +159,7 @@ class FirebaseMethods implements AppMethods {
   @override
   Future<bool> updateProductImages({String docID, List<String> data}) async {
     bool msg;
-    await firestore
+    await fb
         .collection(appProducts)
         .document(docID)
         .updateData({productImages: data}).whenComplete(() {

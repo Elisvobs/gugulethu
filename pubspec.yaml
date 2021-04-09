@@ -31,6 +31,7 @@ dependencies:
   async: ^2.0.8
   get_it: ^3.0.0+1
   provider_architecture: ^1.0.3
+  sizer: ^1.1.8
 
   flutter_parallax: ^0.1.2
   flutter_redux: ^0.6.0
@@ -67,7 +68,7 @@ dev_dependencies:
   flutter_launcher_icons: any
 
 flutter_icon:
-  image_path: assets/images/girlies_logo.png
+  image_path: assets/images/logo.png
   android: true
   ios: true
 

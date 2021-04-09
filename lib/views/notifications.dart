@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:onlineshop/main.dart';
 import 'package:onlineshop/tools/app_data.dart';
+
+import '../main.dart';
+import 'shared/app_colors.dart';
+import 'shared/styles.dart';
 
 class Notifications extends StatefulWidget {
   @override
@@ -10,6 +13,8 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
   BuildContext context;
+
+  String noOrder = "You have no order request....";
 
   // TimeAgo timeAgo = new TimeAgo();
 
@@ -26,7 +31,6 @@ class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
     this.context = context;
-    final Size screenSize = MediaQuery.of(context).size;
     var streamBuilder = new StreamBuilder(
       stream: fb.collection(appProducts).snapshots(),
       builder: (context, snapshot) {
@@ -47,8 +51,7 @@ class _NotificationsState extends State<Notifications> {
                     top: false,
                     bottom: false,
                     child: new Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 8.0),
                       child: new Row(
                         children: <Widget>[
                           new GestureDetector(
@@ -58,7 +61,7 @@ class _NotificationsState extends State<Notifications> {
                                   opaque: false,
                                   pageBuilder: (BuildContext context, _, __) {
                                     return new Material(
-                                      color: Colors.black38,
+                                      color: black,
                                       child: new Container(
                                         padding: const EdgeInsets.all(30.0),
                                         child: new GestureDetector(
@@ -86,7 +89,6 @@ class _NotificationsState extends State<Notifications> {
                                 height: 60.0,
                                 width: 60.0,
                                 decoration: new BoxDecoration(
-                                  //color: color,
                                   image: new DecorationImage(
                                     image: new NetworkImage(productImage[0]),
                                   ),
@@ -107,34 +109,17 @@ class _NotificationsState extends State<Notifications> {
                                   const Padding(
                                       padding: const EdgeInsets.only(top: 5.0)),
                                   //TODO get the time the order was requested to display
-                                  new Text(
-                                    '',
-                                    style: const TextStyle(
-                                      color: const Color(0xFF8E8E93),
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
+                                  new Text('', style: notify),
                                   const Padding(
                                       padding: const EdgeInsets.only(top: 5.0)),
                                   new Text(
-                                    "Order Amount : \$${document[productPrice]}",
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
+                                      "Order Amount : \$${document[productPrice]}",
+                                      style: itemFav),
                                   const Padding(
-                                      padding: const EdgeInsets.only(top: 5.0)),
-                                  new Text(
-                                    "No of Items : $dataCount",
-                                    style: const TextStyle(
-                                      color: const Color(0xFF8E8E93),
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
+                                    padding: const EdgeInsets.only(top: 5.0),
                                   ),
+                                  new Text("No of Items : $dataCount",
+                                      style: notify),
                                 ],
                               ),
                             ),
@@ -145,16 +130,12 @@ class _NotificationsState extends State<Notifications> {
                   ),
                 );
                 return new Container(
-                  margin:
-                      new EdgeInsets.only(left: 8.0, right: 8.0, bottom: 2.0),
-                  color: Colors.white,
+                  margin: new EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 2.0),
+                  color: white,
                   child: new Column(
                     children: <Widget>[
                       row,
-                      new Container(
-                        height: 1.0,
-                        color: Colors.black12.withAlpha(10),
-                      ),
+                      new Container(height: 1.0, color: black.withAlpha(10)),
                     ],
                   ),
                 );
@@ -176,13 +157,7 @@ class _NotificationsState extends State<Notifications> {
                     ),
                     new Padding(
                       padding: const EdgeInsets.all(5.0),
-                      child: new Text(
-                        "You have no support order request....",
-                        style: new TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.black,
-                        ),
-                      ),
+                      child: new Text(noOrder, style: noNotify),
                     ),
                   ],
                 ),
@@ -190,9 +165,7 @@ class _NotificationsState extends State<Notifications> {
             );
           } else {
             return new Column(
-              children: <Widget>[
-                firstList,
-              ],
+              children: [firstList],
             );
           }
         } else if (!snapshot.hasData) {
@@ -206,18 +179,11 @@ class _NotificationsState extends State<Notifications> {
                     margin: new EdgeInsets.only(top: 00.0, bottom: 0.0),
                     height: 150.0,
                     width: 150.0,
-                    child:
-                        new Image.asset('assets/images/no_internet_access.png'),
+                    child: new Image.asset('assets/images/no_access.png'),
                   ),
                   new Padding(
                     padding: const EdgeInsets.all(5.0),
-                    child: new Text(
-                      "No internet access..",
-                      style: new TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.black,
-                      ),
-                    ),
+                    child: new Text("No internet access..", style: noNotify),
                   ),
                 ],
               ),
@@ -234,15 +200,7 @@ class _NotificationsState extends State<Notifications> {
     );
     return new Scaffold(
       appBar: new AppBar(
-        title: new GestureDetector(
-          onLongPress: () {},
-          child: new Text(
-            "Order Notifications",
-            style: new TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
+        title: new Text("Order Notifications"),
         centerTitle: false,
       ),
       body: streamBuilder,

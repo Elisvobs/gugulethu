@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:onlineshop/main.dart';
 import 'package:onlineshop/tools/app_data.dart';
 import 'package:onlineshop/tools/app_methods.dart';
 import 'package:onlineshop/tools/app_tools.dart';
 import 'package:onlineshop/tools/firebase_methods.dart';
-import 'package:onlineshop/userScreens/cart.dart';
+import 'package:onlineshop/views/check_out.dart';
+import 'package:onlineshop/views/shared/icons.dart';
+
+import '../main.dart';
+import 'shared/app_colors.dart';
+import 'shared/styles.dart';
 
 class Favorites extends StatefulWidget {
   @override
@@ -16,12 +20,8 @@ class Favorites extends StatefulWidget {
 class _FavoritesState extends State<Favorites> {
   AppMethods appMethods = new FirebaseMethods();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
-  BuildContext context;
-  var refreshMenuKey = GlobalKey<RefreshIndicatorState>();
-  int cartCount;
-  final int dataCount = 0;
-  bool isInCart;
   bool isFavorite;
+  String noItem = "You have nothing in your favorites...";
 
   @override
   void initState() {
@@ -36,26 +36,16 @@ class _FavoritesState extends State<Favorites> {
 
   @override
   Widget build(BuildContext context) {
-    this.context = context;
     return Scaffold(
       key: scaffoldKey,
+      backgroundColor: white,
       appBar: new AppBar(
-        title: new GestureDetector(
-          onLongPress: () {},
-          child: new Text(
-            "My Favorites",
-            style: new TextStyle(color: Colors.white),
-          ),
-        ),
+        title: new Text("My Favorites"),
         centerTitle: true,
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () => Navigator.of(context).push(
-              new CupertinoPageRoute(
-                builder: (BuildContext context) => new Cart(),
-              ),
-            ),
+            icon: new Icon(Icons.shopping_cart, color: white),
+            onPressed: () => Navigator.of(context).pushNamed('/cart'),
           ),
         ],
       ),
@@ -65,8 +55,7 @@ class _FavoritesState extends State<Favorites> {
           if (!snapshot.hasData) {
             return new Center(
               child: new CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor),
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               ),
             );
           } else {
@@ -97,6 +86,8 @@ class _FavoritesState extends State<Favorites> {
 
   Widget buildFavorites(context, index, DocumentSnapshot document) {
     List productImage = document[productImages] as List;
+    String checkout = 'Checking out ${document[productTitle]}';
+    String minusCart = 'Removed ${document[productTitle]} from your cart';
     final buttons = new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -112,31 +103,13 @@ class _FavoritesState extends State<Favorites> {
               children: <Widget>[
                 new Padding(
                   padding: const EdgeInsets.all(3.0),
-                  child: new Icon(
-                    Icons.delete_forever,
-                    size: 15.0,
-                    color: Colors.red,
-                  ),
+                  child: new Icon(Icons.delete_forever, size: 15.0, color: red),
                 ),
                 new GestureDetector(
-                  onTap: () {
-                    //TODO delete from favorites collection
-                    showSnackBar(
-                        /*widget.fbConn.getProductNameAsList()[widget.index] +*/
-                        "Removed ${document[productTitle]} from favorites",
-                        scaffoldKey);
-                    isFavorite = false;
-                    setState(() {});
-                  },
+                  onTap: () => showRemoveDialog(context, document),
                   child: new Padding(
                     padding: const EdgeInsets.all(3.0),
-                    child: new Text(
-                      "REMOVE",
-                      style: new TextStyle(
-                        color: Colors.red,
-                        fontSize: 10.0,
-                      ),
-                    ),
+                    child: new Text("REMOVE", style: favTxt),
                   ),
                 ),
               ],
@@ -146,7 +119,7 @@ class _FavoritesState extends State<Favorites> {
         new Container(
           height: 20.0,
           width: 1.0,
-          color: Colors.black12,
+          color: black,
           margin: const EdgeInsets.only(left: 2.0, right: 2.0),
         ),
         new Container(
@@ -161,42 +134,13 @@ class _FavoritesState extends State<Favorites> {
               children: <Widget>[
                 new Padding(
                   padding: const EdgeInsets.all(3.0),
-                  child: new Icon(
-                    Icons.add_shopping_cart,
-                    size: 15.0,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  child: addToCart,
                 ),
                 new GestureDetector(
-                  //TODO proceed to payments page
-                  onTap: () {
-                    bool fav = true;
-                    isInCart = fav;
-                    // firestore.collection('favorites').document(userID).setData({
-                    // fb.collection('cart').add({
-                    //   'isFavorite': fav,
-                    //   'product': productTitle,
-                    //   'price': productPrice,
-                    //   'image': productImage,
-                    //   // 'quantity': defaultQuantity,
-                    //   'color': productColor,
-                    //   'size': productSize,
-                    //   // 'isFavorite': isFavorite,
-                    // });
-                    showSnackBar(
-                        " Added ${document[productTitle]} to your cart",
-                        scaffoldKey);
-                    setState(() {});
-                  },
+                  onTap: () => showShopDialog(context),
                   child: new Padding(
                     padding: const EdgeInsets.all(3.0),
-                    child: new Text(
-                      "SHOP",
-                      style: new TextStyle(
-                        color: Colors.black,
-                        fontSize: 10.0,
-                      ),
-                    ),
+                    child: new Text("SHOP", style: favShop),
                   ),
                 )
               ],
@@ -222,7 +166,6 @@ class _FavoritesState extends State<Favorites> {
                       fit: BoxFit.contain,
                       image: productImage[0],
                       placeholder: 'assets/images/placeholder.png',
-                      // placeholder: kTransparentImage,
                     ),
                   ),
                   // decoration: new BoxDecoration(
@@ -237,15 +180,68 @@ class _FavoritesState extends State<Favorites> {
                 alignment: Alignment.center,
                 child: new Padding(
                   padding: const EdgeInsets.all(5.0),
-                  child: new Text(
-                    "${document[productTitle]}",
-                  ),
+                  child: new Text("${document[productTitle]}"),
                 ),
               ),
               buttons,
             ],
           ), //just for testing, will fill with image later
         ),
+      ),
+    );
+  }
+
+  showRemoveDialog(BuildContext context, DocumentSnapshot document) {
+    String minusCart = 'Removed ${document[productTitle]} from your favorites';
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Remove ${document[productTitle]} from favorites?'),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("No"),
+          ),
+          FlatButton(
+            child: Text("Yes"),
+            onPressed: () {
+              fb
+                  .collection('appProducts')
+                  // .document(document.documentID)
+                  .document()
+                  .delete()
+                  .then((value) => Navigator.pop(context));
+              showSnackBar(minusCart, scaffoldKey);
+              Navigator.pop(context);
+              isFavorite = false;
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showShopDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Proceed to checkout?'),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("No"),
+          ),
+          FlatButton(
+            child: Text("Yes"),
+            //TODO get the prices and total items from the shop item to checkout
+            onPressed: () {
+              Navigator.of(context).push(
+                  new MaterialPageRoute(builder: (context) => new CheckOut()));
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -265,13 +261,7 @@ class _FavoritesState extends State<Favorites> {
             ),
             new Padding(
               padding: const EdgeInsets.all(5.0),
-              child: new Text(
-                "You have nothing in your favorites...",
-                style: new TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.black,
-                ),
-              ),
+              child: new Text(noItem, style: noFav),
             ),
           ],
         ),

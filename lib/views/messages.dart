@@ -4,6 +4,8 @@ import 'package:flutter_dialogflow/v2/auth_google.dart';
 import 'package:flutter_dialogflow/v2/dialogflow_v2.dart';
 import 'package:flutter_dialogflow/v2/message.dart';
 
+import 'shared/styles.dart';
+
 class Messages extends StatefulWidget {
   @override
   _MessagesState createState() => _MessagesState();
@@ -78,10 +80,7 @@ class _MessagesState extends State<Messages>
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Chat With Us"),
-        centerTitle: false,
-      ),
+      appBar: new AppBar(title: new Text("Chat With Us"), centerTitle: false),
       body: new Container(
         child: Column(
           children: [
@@ -113,24 +112,17 @@ class ChatMessage extends StatelessWidget {
   final String text, name, initials;
   final bool type;
 
-  // final String initials;
-
   List<Widget> otherMessage(context) {
     return <Widget>[
       new Container(
         margin: const EdgeInsets.only(right: 16.0),
-        child: new CircleAvatar(
-          child: new Text(initials),
-        ),
+        child: new CircleAvatar(child: new Text(initials)),
       ),
       new Expanded(
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new Text(
-              this.name,
-              style: new TextStyle(fontWeight: FontWeight.bold),
-            ),
+            new Text(this.name, style: msgBold),
             new Container(
               margin: const EdgeInsets.only(top: 5.0),
               child: new Text(text),
@@ -147,10 +139,7 @@ class ChatMessage extends StatelessWidget {
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            new Text(
-              this.name,
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
+            new Text(this.name, style: Theme.of(context).textTheme.subtitle1),
             new Container(
               margin: const EdgeInsets.only(top: 5.0),
               child: new Text(text),
@@ -161,10 +150,7 @@ class ChatMessage extends StatelessWidget {
       new Container(
         margin: const EdgeInsets.only(left: 16.0),
         child: new CircleAvatar(
-          child: new Text(
-            initials,
-            style: new TextStyle(fontWeight: FontWeight.bold),
-          ),
+          child: new Text(initials, style: msgBold),
         ),
       ),
     ];

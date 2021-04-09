@@ -14,6 +14,9 @@ const String accountName = "accountName";
 const String phoneNumber = "phoneNumber";
 const String userEmail = "userEmail";
 const String userPassword = "userPassword";
+const String deliveryAddress = "address";
+const String deliveryLocation = "locations";
+const String deliveryCity = "cities";
 const String photoUrl = "photoUrl";
 const String loggedIn = "loggedIn";
 

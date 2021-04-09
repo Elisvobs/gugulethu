@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:onlineshop/userScreens/about_us.dart';
-import 'package:onlineshop/userScreens/address.dart';
-import 'package:onlineshop/userScreens/history.dart';
+import 'package:onlineshop/tools/app_tools.dart';
+
+import '../main.dart';
+import 'shared/app_colors.dart';
+import 'shared/icons.dart';
+import 'shared/styles.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -11,36 +14,31 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
   BuildContext context;
-  String fullName;
-  String email;
-  String phone;
-  String userid;
-  String profileImgUrl;
+  String fullName, email, phone;
+  String userid, profileImgUrl;
   bool isLoggedIn;
-  String _btnText;
 
   // final googleSignIn = new GoogleSignIn();
   FirebaseUser user;
-  FirebaseAuth _auth;
   bool _isSignedIn;
 
   @override
   void initState() {
     super.initState();
-    _auth = FirebaseAuth.instance;
     _getCurrentUser();
   }
 
   _getCurrentUser() async {
-    user = await _auth.currentUser().catchError((error) {
+    user = await auth.currentUser().catchError((error) {
       print(error);
     });
 
     if (user != null) {
       setState(() {
-        _btnText = "Logout";
-        _isSignedIn = true;
+        // ignore: unnecessary_statements
+        _isSignedIn == false ? "Login" : "Logout";
         email = user.email;
         fullName = user.displayName;
         profileImgUrl = user.photoUrl;
@@ -60,7 +58,8 @@ class _ProfileState extends State<Profile> {
     final Size screenSize = MediaQuery.of(context).size;
 
     return new Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: white,
+      key: scaffoldKey,
       appBar: new AppBar(
         title: new Text("Profile Settings"),
         centerTitle: false,
@@ -70,57 +69,53 @@ class _ProfileState extends State<Profile> {
         child: Column(
           children: [
             new Container(
-              margin: new EdgeInsets.only(left: 10.0, right: 10.0, top: 20.0),
+              margin: new EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 20.0),
               child: DecoratedBox(
                 child: _buildAvatar(),
                 decoration: new BoxDecoration(
-                  borderRadius: new BorderRadius.all(
-                    new Radius.circular(5.0),
-                  ),
-                  color: Theme.of(context).primaryColor,
+                  borderRadius: new BorderRadius.all(new Radius.circular(5.0)),
+                  color: primaryColor,
                 ),
               ),
             ),
             new Divider(height: 10.0),
             _buildListItem('Change Name', Icons.person, () {}),
             _buildListItem('Change Number', Icons.phone_iphone, () {}),
-            _buildListItem('Delivery Address', Icons.home, () {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Address()));
-            }),
-            _buildListItem('Order History', Icons.history, () {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new History()));
-            }),
-            _buildListItem('About Us', Icons.help, () {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new AboutUs()));
-            }),
+            _buildListItem(
+              'Delivery Address',
+              Icons.home,
+              () => Navigator.of(context).pushNamed('/address'),
+            ),
+            _buildListItem(
+              'Order History',
+              Icons.history,
+              () => Navigator.of(context).pushNamed('/his'),
+            ),
+            _buildListItem(
+              'About Us',
+              Icons.help,
+              () => Navigator.of(context).pushNamed('/about'),
+            ),
             new InkWell(
               child: new Container(
                 height: 50.0,
-                color: Colors.white,
+                color: white,
                 margin: new EdgeInsets.only(top: 20.0),
                 child: new Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: new Container(
                     width: screenSize.width,
-                    margin: new EdgeInsets.only(
-                        left: 10.0, right: 10.0, bottom: 2.0),
+                    margin: new EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 2.0),
                     height: 60.0,
                     decoration: new BoxDecoration(
-                      color: Colors.blue,
+                      color: blue,
                       borderRadius: new BorderRadius.all(
                         new Radius.circular(5.0),
                       ),
                     ),
                     child: new Center(
-                      child: new Text(
-                        _isSignedIn == false ? "LOGIN" : "LOGOUT",
-                        style: new TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: new Text(_isSignedIn == true ? "LOGIN" : "LOGOUT",
+                          style: whiteTxt),
                     ),
                   ),
                 ),
@@ -134,14 +129,9 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildListItem(String title, IconData iconData, VoidCallback action) {
-    final textStyle = new TextStyle(
-      fontSize: 15.0,
-      fontWeight: FontWeight.w500,
-    );
     return new InkWell(
       child: new Padding(
-        padding: const EdgeInsets.only(
-            left: 10.0, right: 10.0, bottom: 5.0, top: 5.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,17 +141,15 @@ class _ProfileState extends State<Profile> {
               height: 35.0,
               margin: const EdgeInsets.only(right: 10.0),
               decoration: new BoxDecoration(
-                color: Colors.blue[600],
+                color: blue,
                 borderRadius: new BorderRadius.circular(5.0),
               ),
               alignment: Alignment.center,
-              child: new Icon(iconData, color: Colors.white, size: 20.0),
+              child: new Icon(iconData, color: white, size: 20.0),
             ),
-            new Text(title, style: textStyle),
+            new Text(title, style: profile),
             new Expanded(child: new Container()),
-            new IconButton(
-                icon: new Icon(Icons.chevron_right, color: Colors.black26),
-                onPressed: null)
+            new IconButton(icon: goTo, onPressed: null)
           ],
         ),
       ),
@@ -170,16 +158,6 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildAvatar() {
-    final mainTextStyle = new TextStyle(
-        fontFamily: 'Timeburner',
-        color: Colors.white,
-        fontWeight: FontWeight.w500,
-        fontSize: 20.0);
-    final subTextStyle = new TextStyle(
-        fontFamily: 'Timeburner',
-        fontSize: 16.0,
-        color: Colors.white70,
-        fontWeight: FontWeight.w500);
     return new Container(
       margin: new EdgeInsets.only(top: 10.0, bottom: 10.0),
       child: new Row(
@@ -200,7 +178,7 @@ class _ProfileState extends State<Profile> {
                 borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                 boxShadow: <BoxShadow>[
                   new BoxShadow(
-                    color: Colors.black26,
+                    color: black,
                     blurRadius: 5.0,
                     spreadRadius: 1.0,
                   ),
@@ -212,18 +190,10 @@ class _ProfileState extends State<Profile> {
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new Text(
-                fullName != null ? fullName : fullName = "Your Name",
-                style: mainTextStyle,
-              ),
-              new Text(
-                email != null ? email : email = "Your Email",
-                style: subTextStyle,
-              ),
-              new Text(
-                phone != null ? phone : phone = "Your Number",
-                style: subTextStyle,
-              ),
+              new Text(fullName != null ? fullName : "Your Name",
+                  style: avatar),
+              new Text(email != null ? email : "Your Email", style: avatarTxt),
+              new Text(phone != null ? phone : "Your Number", style: avatarTxt),
             ],
           ),
         ],
@@ -232,13 +202,9 @@ class _ProfileState extends State<Profile> {
   }
 
   Future _signOut() async {
-    await _auth.signOut();
+    await auth.signOut();
     // googleSignIn.signOut();
-    Scaffold.of(context).showSnackBar(
-      new SnackBar(
-        content: new Text('User logged out'),
-      ),
-    );
+    showSnackBar('User logged out', scaffoldKey);
     setState(() {
       _isSignedIn = false;
       fullName = null;

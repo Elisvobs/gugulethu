@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:onlineshop/main.dart';
 import 'package:onlineshop/tools/app_data.dart';
+import 'package:onlineshop/views/shared/icons.dart';
+
+import '../main.dart';
+import 'shared/app_colors.dart';
+import 'shared/styles.dart';
 
 class History extends StatefulWidget {
   @override
@@ -11,6 +15,7 @@ class History extends StatefulWidget {
 
 class _HistoryState extends State<History> {
   BuildContext context;
+  String noHistory = "You have no order history...";
 
   @override
   Widget build(BuildContext context) {
@@ -37,39 +42,36 @@ class _HistoryState extends State<History> {
                     top: false,
                     bottom: false,
                     child: new Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 8.0),
                       child: new Row(
                         children: <Widget>[
                           new GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                new PageRouteBuilder(
-                                  opaque: false,
-                                  pageBuilder: (BuildContext context, _, __) {
-                                    return new Material(
-                                      color: Colors.black38,
-                                      child: new Container(
-                                        padding: const EdgeInsets.all(30.0),
-                                        child: new GestureDetector(
-                                          onTap: () => Navigator.pop(context),
-                                          child: new Hero(
-                                            child: new Image.network(
-                                              productImage[0],
-                                              width: 300.0,
-                                              height: 300.0,
-                                              alignment: Alignment.center,
-                                              fit: BoxFit.contain,
-                                            ),
-                                            tag: "${document[productTitle]}",
+                            onTap: () => Navigator.of(context).push(
+                              new PageRouteBuilder(
+                                opaque: false,
+                                pageBuilder: (BuildContext context, _, __) {
+                                  return new Material(
+                                    color: black,
+                                    child: new Container(
+                                      padding: const EdgeInsets.all(30.0),
+                                      child: new GestureDetector(
+                                        onTap: () => Navigator.pop(context),
+                                        child: new Hero(
+                                          child: new Image.network(
+                                            productImage[0],
+                                            width: 300.0,
+                                            height: 300.0,
+                                            alignment: Alignment.center,
+                                            fit: BoxFit.contain,
                                           ),
+                                          tag: "${document[productTitle]}",
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                             child: new Hero(
                               tag: "${document[productTitle]}",
                               child: new Container(
@@ -93,42 +95,21 @@ class _HistoryState extends State<History> {
                                   new Text('${document[productTitle]}'),
                                   const Padding(
                                       padding: const EdgeInsets.only(top: 5.0)),
-                                  new Text(
-                                    "\$${document[productPrice]}",
-                                    style: const TextStyle(
-                                      color: const Color(0xFF8E8E93),
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
+                                  new Text("\$${document[productPrice]}",
+                                      style: hisTxt),
                                 ],
                               ),
                             ),
                           ),
                           new CupertinoButton(
                             padding: EdgeInsets.zero,
-                            child: new Icon(
-                              CupertinoIcons.minus_circled,
-                              color: Theme.of(context).primaryColor,
-                              semanticLabel: 'Substract',
-                            ),
+                            child: minus,
                             onPressed: () {},
                           ),
-                          new Text(
-                            '1',
-                            style: const TextStyle(
-                              color: const Color(0xFF8E8E93),
-                              fontSize: 13.0,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
+                          new Text('1', style: hisTxt),
                           new CupertinoButton(
                             padding: EdgeInsets.zero,
-                            child: new Icon(
-                              CupertinoIcons.plus_circled,
-                              color: Theme.of(context).primaryColor,
-                              semanticLabel: 'Add',
-                            ),
+                            child: plus,
                             onPressed: () {},
                           ),
                         ],
@@ -138,14 +119,12 @@ class _HistoryState extends State<History> {
                 );
 
                 return new Container(
-                  margin:
-                      new EdgeInsets.only(left: 8.0, right: 8.0, bottom: 2.0),
-                  color: Colors.white,
+                  margin: new EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 2.0),
+                  color: white,
                   child: new Column(
                     children: <Widget>[
                       row,
-                      new Container(
-                          height: 1.0, color: Colors.black12.withAlpha(10)),
+                      new Container(height: 1.0, color: black.withAlpha(10)),
                     ],
                   ),
                 );
@@ -168,13 +147,7 @@ class _HistoryState extends State<History> {
                     ),
                     new Padding(
                       padding: const EdgeInsets.all(5.0),
-                      child: new Text(
-                        "You have no order history...",
-                        style: new TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.black,
-                        ),
-                      ),
+                      child: new Text(noHistory, style: noHis),
                     ),
                   ],
                 ),
@@ -185,15 +158,13 @@ class _HistoryState extends State<History> {
           }
         } else {
           return new Center(
-              child: new Center(child: new CircularProgressIndicator()));
+            child: new Center(child: new CircularProgressIndicator()),
+          );
         }
       },
     );
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Order History"),
-        centerTitle: false,
-      ),
+      appBar: new AppBar(title: new Text("Order History"), centerTitle: false),
       body: streamBuilder,
     );
   }
